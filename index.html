@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DICOM Viewer — F.Z. Karrakchou</title>
+<script>
+/*! dicom-parser - 1.8.12 - 2023-02-20 | (c) 2017 Chris Hafey | https://github.com/cornerstonejs/dicomParser */
+!function(e,t){"object"==typeof exports&&"object"==typeof module?module.exports=t(require("zlib")):"function"==typeof define&&define.amd?define("dicom-parser",["zlib"],t):"object"==typeof exports?exports["dicom-parser"]=t(require("zlib")):e.dicomParser=t(e.zlib)}(this,function(r){return a=[function(e,t){e.exports=r},function(e,t,s){"use strict";s.r(t),s.d(t,"isStringVr",function(){return d}),s.d(t,"isPrivateTag",function(){return f}),s.d(t,"parsePN",function(){return a}),s.d(t,"parseTM",function(){return n}),s.d(t,"parseDA",function(){return o}),s.d(t,"explicitElementToString",function(){return l}),s.d(t,"explicitDataSetToJS",function(){return u}),s.d(t,"createJPEGBasicOffsetTable",function(){return p}),s.d(t,"parseDicomDataSetExplicit",function(){return q}),s.d(t,"parseDicomDataSetImplicit",function(){return T}),s.d(t,"readFixedString",function(){return b}),s.d(t,"alloc",function(){return k}),s.d(t,"version",function(){return L}),s.d(t,"bigEndianByteArrayParser",function(){return N}),s.d(t,"ByteStream",function(){return J}),s.d(t,"sharedCopy",function(){return j}),s.d(t,"DataSet",function(){return w}),s.d(t,"findAndSetUNElementLength",function(){return y}),s.d(t,"findEndOfEncapsulatedElement",function(){return g}),s.d(t,"findItemDelimitationItemAndSetElementLength",function(){return x}),s.d(t,"littleEndianByteArrayParser",function(){return M}),s.d(t,"parseDicom",function(){return V}),s.d(t,"readDicomElementExplicit",function(){return B}),s.d(t,"readDicomElementImplicit",function(){return A}),s.d(t,"readEncapsulatedImageFrame",function(){return W}),s.d(t,"readEncapsulatedPixelData",function(){return K}),s.d(t,"readEncapsulatedPixelDataFromFragments",function(){return _}),s.d(t,"readPart10Header",function(){return G}),s.d(t,"readSequenceItemsExplicit",function(){return I}),s.d(t,"readSequenceItemsImplicit",function(){return F}),s.d(t,"readSequenceItem",function(){return S}),s.d(t,"readTag",function(){return h});var r={AE:!0,AS:!0,AT:!1,CS:!0,DA:!0,DS:!0,DT:!0,FL:!1,FD:!1,IS:!0,LO:!0,LT:!0,OB:!1,OD:!1,OF:!1,OW:!1,PN:!0,SH:!0,SL:!1,SQ:!1,SS:!1,ST:!0,TM:!0,UI:!0,UL:!1,UN:void 0,UR:!0,US:!1,UT:!0},d=function(e){return r[e]},f=function(e){e=parseInt(e[4],16);if(isNaN(e))throw"dicomParser.isPrivateTag: cannot parse last character of group";return e%2==1},a=function(e){if(void 0!==e){e=e.split("^");return{familyName:e[0],givenName:e[1],middleName:e[2],prefix:e[3],suffix:e[4]}}};function n(e,t){if(2<=e.length){var r=parseInt(e.substring(0,2),10),a=4<=e.length?parseInt(e.substring(2,4),10):void 0,n=6<=e.length?parseInt(e.substring(4,6),10):void 0,i=8<=e.length?e.substring(7,13):void 0,i=i?parseInt(i,10)*Math.pow(10,6-i.length):void 0;if(t&&(isNaN(r)||void 0!==a&&isNaN(a)||void 0!==n&&isNaN(n)||void 0!==i&&isNaN(i)||r<0||23<r||a&&(a<0||59<a)||n&&(n<0||59<n)||i&&(i<0||999999<i)))throw"invalid TM '".concat(e,"'");return{hours:r,minutes:a,seconds:n,fractionalSeconds:i}}if(t)throw"invalid TM '".concat(e,"'")}function i(e,t,r){return!isNaN(r)&&(0<t&&t<=12&&0<e&&e<=function(e,t){switch(e){case 2:return t%4==0&&t%100||t%400==0?29:28;case 9:case 4:case 6:case 11:return 30;default:return 31}}(t,r))}function o(e,t){if(e&&8===e.length){var r=parseInt(e.substring(0,4),10),a=parseInt(e.substring(4,6),10),n=parseInt(e.substring(6,8),10);if(t&&!0!==i(n,a,r))throw"invalid DA '".concat(e,"'");return{year:r,month:a,day:n}}if(t)throw"invalid DA '".concat(e,"'")}function l(n,e){if(void 0===n||void 0===e)throw"dicomParser.explicitElementToString: missing required parameters";if(void 0===e.vr)throw"dicomParser.explicitElementToString: cannot convert implicit element to string";var t,r=e.vr,i=e.tag;function a(e,t){for(var r="",a=0;a<e;a++)0!==a&&(r+="/"),r+=t.call(n,i,a).toString();return r}if(!0===d(r))t=n.string(i);else{if("AT"===r){var o=n.uint32(i);return void 0===o?void 0:"x".concat((o=o<0?4294967295+o+1:o).toString(16).toUpperCase())}"US"===r?t=a(e.length/2,n.uint16):"SS"===r?t=a(e.length/2,n.int16):"UL"===r?t=a(e.length/4,n.uint32):"SL"===r?t=a(e.length/4,n.int32):"FD"===r?t=a(e.length/8,n.double):"FL"===r&&(t=a(e.length/4,n.float))}return t}function u(e,t){if(void 0===e)throw"dicomParser.explicitDataSetToJS: missing required parameter dataSet";t=t||{omitPrivateAttibutes:!0,maxElementLength:128};var r,a={};for(r in e.elements){var n=e.elements[r];if(!0!==t.omitPrivateAttibutes||!f(r))if(n.items){for(var i=[],o=0;o<n.items.length;o++)i.push(u(n.items[o].dataSet,t));a[r]=i}else{var s=void 0;n.length<t.maxElementLength&&(s=l(e,n)),a[r]=void 0!==s?s:{dataOffset:n.dataOffset,length:n.length}}}return a}function c(e,t){return 255===e.byteArray[t]&&217===e.byteArray[t+1]}function m(e,t,r){for(var a,n,i=r;i<t.fragments.length;i++)if(a=e,n=i,n=t.fragments[n],!(!c(a,n.position+n.length-2)&&!c(a,n.position+n.length-3)))return i}function p(e,t,r){if(void 0===e)throw"dicomParser.createJPEGBasicOffsetTable: missing required parameter dataSet";if(void 0===t)throw"dicomParser.createJPEGBasicOffsetTable: missing required parameter pixelDataElement";if("x7fe00010"!==t.tag)throw"dicomParser.createJPEGBasicOffsetTable: parameter 'pixelDataElement' refers to non pixel data tag (expected tag = x7fe00010'";if(!0!==t.encapsulatedPixelData)throw"dicomParser.createJPEGBasicOffsetTable: parameter 'pixelDataElement' refers to pixel data element that does not have encapsulated pixel data";if(!0!==t.hadUndefinedLength)throw"dicomParser.createJPEGBasicOffsetTable: parameter 'pixelDataElement' refers to pixel data element that does not have encapsulated pixel data";if(void 0===t.basicOffsetTable)throw"dicomParser.createJPEGBasicOffsetTable: parameter 'pixelDataElement' refers to pixel data element that does not have encapsulated pixel data";if(void 0===t.fragments)throw"dicomParser.createJPEGBasicOffsetTable: parameter 'pixelDataElement' refers to pixel data element that does not have encapsulated pixel data";if(t.fragments.length<=0)throw"dicomParser.createJPEGBasicOffsetTable: parameter 'pixelDataElement' refers to pixel data element that does not have encapsulated pixel data";if(r&&r.length<=0)throw"dicomParser.createJPEGBasicOffsetTable: parameter 'fragments' must not be zero length";r=r||t.fragments;for(var a=[],n=0;;){a.push(t.fragments[n].offset);var i=m(e,t,n);if(void 0===i||i===t.fragments.length-1)return a;n=i+1}}function h(e){if(void 0===e)throw"dicomParser.readTag: missing required parameter 'byteStream'";var t=256*e.readUint16()*256,e=e.readUint16();return"x".concat("00000000".concat((t+e).toString(16)).substr(-8))}function g(e,t,r){if(void 0===e)throw"dicomParser.findEndOfEncapsulatedElement: missing required parameter 'byteStream'";if(void 0===t)throw"dicomParser.findEndOfEncapsulatedElement: missing required parameter 'element'";if(t.encapsulatedPixelData=!0,t.basicOffsetTable=[],t.fragments=[],"xfffee000"!==h(e))throw"dicomParser.findEndOfEncapsulatedElement: basic offset table not found";for(var a=e.readUint32()/4,n=0;n<a;n++){var i=e.readUint32();t.basicOffsetTable.push(i)}for(var o=e.position;e.position<e.byteArray.length;){var s=h(e),d=e.readUint32();if("xfffee0dd"===s)return e.seek(d),void(t.length=e.position-t.dataOffset);if("xfffee000"!==s)return r&&r.push("unexpected tag ".concat(s," while searching for end of pixel data element with undefined length")),d>e.byteArray.length-e.position&&(d=e.byteArray.length-e.position),t.fragments.push({offset:e.position-o-8,position:e.position,length:d}),e.seek(d),void(t.length=e.position-t.dataOffset);t.fragments.push({offset:e.position-o-8,position:e.position,length:d}),e.seek(d)}r&&r.push("pixel data element ".concat(t.tag," missing sequence delimiter tag xfffee0dd"))}function y(e,t){if(void 0===e)throw"dicomParser.findAndSetUNElementLength: missing required parameter 'byteStream'";for(var r=e.byteArray.length-8;e.position<=r;)if(65534===e.readUint16()){var a=e.readUint16();if(57565===a)return 0!==e.readUint32()&&e.warnings("encountered non zero length following item delimiter at position ".concat(e.position-4," while reading element of undefined length with tag ").concat(t.tag)),void(t.length=e.position-t.dataOffset)}t.length=e.byteArray.length-t.dataOffset,e.seek(e.byteArray.length-e.position)}function b(e,t,r){if(r<0)throw"dicomParser.readFixedString - length cannot be less than 0";if(t+r>e.length)throw"dicomParser.readFixedString: attempt to read past end of buffer";for(var a,n="",i=0;i<r;i++){if(0===(a=e[t+i]))return t+=r,n;n+=String.fromCharCode(a)}return n}function v(e,t){for(var r=0;r<t.length;r++){var a=t[r];a.enumerable=a.enumerable||!1,a.configurable=!0,"value"in a&&(a.writable=!0),Object.defineProperty(e,a.key,a)}}function P(e,t){return void 0!==e.parser?e.parser:t}var w=function(){function a(e,t,r){!function(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}(this,a),this.byteArrayParser=e,this.byteArray=t,this.elements=r}var e,t,r;return e=a,(t=[{key:"uint16",value:function(e,t){e=this.elements[e];if(t=void 0!==t?t:0,e&&0!==e.length)return P(e,this.byteArrayParser).readUint16(this.byteArray,e.dataOffset+2*t)}},{key:"int16",value:function(e,t){e=this.elements[e];if(t=void 0!==t?t:0,e&&0!==e.length)return P(e,this.byteArrayParser).readInt16(this.byteArray,e.dataOffset+2*t)}},{key:"uint32",value:function(e,t){e=this.elements[e];if(t=void 0!==t?t:0,e&&0!==e.length)return P(e,this.byteArrayParser).readUint32(this.byteArray,e.dataOffset+4*t)}},{key:"int32",value:function(e,t){e=this.elements[e];if(t=void 0!==t?t:0,e&&0!==e.length)return P(e,this.byteArrayParser).readInt32(this.byteArray,e.dataOffset+4*t)}},{key:"float",value:function(e,t){e=this.elements[e];if(t=void 0!==t?t:0,e&&0!==e.length)return P(e,this.byteArrayParser).readFloat(this.byteArray,e.dataOffset+4*t)}},{key:"double",value:function(e,t){e=this.elements[e];if(t=void 0!==t?t:0,e&&0!==e.length)return P(e,this.byteArrayParser).readDouble(this.byteArray,e.dataOffset+8*t)}},{key:"numStringValues",value:function(e){e=this.elements[e];if(e&&0<e.length){e=b(this.byteArray,e.dataOffset,e.length).match(/\\/g);return null===e?1:e.length+1}}},{key:"string",value:function(e,t){e=this.elements[e];if(e&&e.Value)return e.Value;if(e&&0<e.length){e=b(this.byteArray,e.dataOffset,e.length);return 0<=t?e.split("\\")[t].trim():e.trim()}}},{key:"text",value:function(e,t){e=this.elements[e];if(e&&0<e.length){e=b(this.byteArray,e.dataOffset,e.length);return 0<=t?e.split("\\")[t].replace(/ +$/,""):e.replace(/ +$/,"")}}},{key:"floatString",value:function(e,t){var r=this.elements[e];if(r&&0<r.length){t=this.string(e,t=void 0!==t?t:0);if(void 0!==t)return parseFloat(t)}}},{key:"intString",value:function(e,t){var r=this.elements[e];if(r&&0<r.length){t=this.string(e,t=void 0!==t?t:0);if(void 0!==t)return parseInt(t)}}},{key:"attributeTag",value:function(e){var t=this.elements[e];if(t&&4===t.length){var r=P(t,this.byteArrayParser).readUint16,e=this.byteArray,t=t.dataOffset;return"x".concat("00000000".concat((256*r(e,t)*256+r(e,t+2)).toString(16)).substr(-8))}}}])&&v(e.prototype,t),r&&v(e,r),Object.defineProperty(e,"prototype",{writable:!1}),a}();function x(e,t){if(void 0===e)throw"dicomParser.readDicomElementImplicit: missing required parameter 'byteStream'";for(var r=e.byteArray.length-8;e.position<=r;)if(65534===e.readUint16()){var a=e.readUint16();if(57357===a)return 0!==e.readUint32()&&e.warnings("encountered non zero length following item delimiter at position ".concat(e.position-4," while reading element of undefined length with tag ").concat(t.tag)),void(t.length=e.position-t.dataOffset)}t.length=e.byteArray.length-t.dataOffset,e.seek(e.byteArray.length-e.position)}var E=function(e,t){if(void 0!==e.vr)return"SQ"===e.vr;if(t.position+4<=t.byteArray.length){e=h(t);return t.seek(-4),"xfffee000"===e||"xfffee0dd"===e}return t.warnings.push("eof encountered before finding sequence item tag or sequence delimiter tag in peeking to determine VR"),!1};function A(e,t,r){if(void 0===e)throw"dicomParser.readDicomElementImplicit: missing required parameter 'byteStream'";var a=h(e),a={tag:a,vr:void 0!==r?r(a):void 0,length:e.readUint32(),dataOffset:e.position};return 4294967295===a.length&&(a.hadUndefinedLength=!0),a.tag===t||(!E(a,e)||f(a.tag)&&!a.hadUndefinedLength?a.hadUndefinedLength?x(e,a):e.seek(a.length):(F(e,a,r),f(a.tag)&&(a.items=void 0))),a}function S(e){if(void 0===e)throw"dicomParser.readSequenceItem: missing required parameter 'byteStream'";var t={tag:h(e),length:e.readUint32(),dataOffset:e.position};if("xfffee000"!==t.tag)throw"dicomParser.readSequenceItem: item tag (FFFE,E000) not found at offset ".concat(e.position);return t}function D(e,t){var r=S(e);return 4294967295===r.length?(r.hadUndefinedLength=!0,r.dataSet=function(e,t){for(var r={};e.position<e.byteArray.length;){var a=A(e,void 0,t);if("xfffee00d"===(r[a.tag]=a).tag)return new w(e.byteArrayParser,e.byteArray,r)}return e.warnings.push("eof encountered before finding sequence item delimiter in sequence item of undefined length"),new w(e.byteArrayParser,e.byteArray,r)}(e,t),r.length=e.position-r.dataOffset):(r.dataSet=new w(e.byteArrayParser,e.byteArray,{}),T(r.dataSet,e,e.position+r.length,{vrCallback:t})),r}function F(e,t,r){if(void 0===e)throw"dicomParser.readSequenceItemsImplicit: missing required parameter 'byteStream'";if(void 0===t)throw"dicomParser.readSequenceItemsImplicit: missing required parameter 'element'";t.items=[],(4294967295===t.length?function(e,t,r){for(;e.position+4<=e.byteArray.length;){var a=h(e);if(e.seek(-4),"xfffee0dd"===a)return t.length=e.position-t.dataOffset,e.seek(8);a=D(e,r);t.items.push(a)}e.warnings.push("eof encountered before finding sequence delimiter in sequence of undefined length"),t.length=e.byteArray.length-t.dataOffset}:function(e,t,r){for(var a=t.dataOffset+t.length;e.position<a;){var n=D(e,r);t.items.push(n)}})(e,t,r)}function O(e,t){var r=S(e);return 4294967295===r.length?(r.hadUndefinedLength=!0,r.dataSet=function(e,t){for(var r={};e.position<e.byteArray.length;){var a=B(e,t);if("xfffee00d"===(r[a.tag]=a).tag)return new w(e.byteArrayParser,e.byteArray,r)}return t.push("eof encountered before finding item delimiter tag while reading sequence item of undefined length"),new w(e.byteArrayParser,e.byteArray,r)}(e,t),r.length=e.position-r.dataOffset):(r.dataSet=new w(e.byteArrayParser,e.byteArray,{}),q(r.dataSet,e,e.position+r.length)),r}function I(e,t,r){if(void 0===e)throw"dicomParser.readSequenceItemsExplicit: missing required parameter 'byteStream'";if(void 0===t)throw"dicomParser.readSequenceItemsExplicit: missing required parameter 'element'";t.items=[],(4294967295===t.length?function(e,t,r){for(;e.position+4<=e.byteArray.length;){var a=h(e);if(e.seek(-4),"xfffee0dd"===a)return t.length=e.position-t.dataOffset,e.seek(8);a=O(e,r);t.items.push(a)}r.push("eof encountered before finding sequence delimitation tag while reading sequence of undefined length"),t.length=e.position-t.dataOffset}:function(e,t,r){for(var a=t.dataOffset+t.length;e.position<a;){var n=O(e,r);t.items.push(n)}})(e,t,r)}var U=function(e){return"OB"===e||"OD"===e||"OL"===e||"OW"===e||"SQ"===e||"OF"===e||"UC"===e||"UR"===e||"UT"===e||"UN"===e?4:2};function B(e,t,r){if(void 0===e)throw"dicomParser.readDicomElementExplicit: missing required parameter 'byteStream'";var a={tag:h(e),vr:e.readFixedString(2)};return 2===U(a.vr)?a.length=e.readUint16():(e.seek(2),a.length=e.readUint32()),a.dataOffset=e.position,4294967295===a.length&&(a.hadUndefinedLength=!0),a.tag===r||("SQ"===a.vr?I(e,a,t):4294967295===a.length?"x7fe00010"===a.tag?g(e,a,t):("UN"===a.vr?F:x)(e,a):e.seek(a.length)),a}function q(e,t,r){var a=3<arguments.length&&void 0!==arguments[3]?arguments[3]:{};if(r=void 0===r?t.byteArray.length:r,void 0===t)throw"dicomParser.parseDicomDataSetExplicit: missing required parameter 'byteStream'";if(r<t.position||r>t.byteArray.length)throw"dicomParser.parseDicomDataSetExplicit: invalid value for parameter 'maxP osition'";for(var n=e.elements;t.position<r;){var i=B(t,e.warnings,a.untilTag);if((n[i.tag]=i).tag===a.untilTag)return}if(t.position>r)throw"dicomParser:parseDicomDataSetExplicit: buffer overrun"}function T(e,t,r){var a=3<arguments.length&&void 0!==arguments[3]?arguments[3]:{};if(r=void 0===r?e.byteArray.length:r,void 0===t)throw"dicomParser.parseDicomDataSetImplicit: missing required parameter 'byteStream'";if(r<t.position||r>t.byteArray.length)throw"dicomParser.parseDicomDataSetImplicit: invalid value for parameter 'maxPosition'";for(var n=e.elements;t.position<r;){var i=A(t,a.untilTag,a.vrCallback);if((n[i.tag]=i).tag===a.untilTag)return}}function k(e,t){if("undefined"!=typeof Buffer&&e instanceof Buffer)return Buffer.alloc(t);if(e instanceof Uint8Array)return new Uint8Array(t);throw"dicomParser.alloc: unknown type for byteArray"}var L="1.8.12",N={readUint16:function(e,t){if(t<0)throw"bigEndianByteArrayParser.readUint16: position cannot be less than 0";if(t+2>e.length)throw"bigEndianByteArrayParser.readUint16: attempt to read past end of buffer";return(e[t]<<8)+e[t+1]},readInt16:function(e,t){if(t<0)throw"bigEndianByteArrayParser.readInt16: position cannot be less than 0";if(t+2>e.length)throw"bigEndianByteArrayParser.readInt16: attempt to read past end of buffer";t=(e[t]<<8)+e[t+1];return t=32768&t?t-65535-1:t},readUint32:function(e,t){if(t<0)throw"bigEndianByteArrayParser.readUint32: position cannot be less than 0";if(t+4>e.length)throw"bigEndianByteArrayParser.readUint32: attempt to read past end of buffer";return 256*(256*(256*e[t]+e[t+1])+e[t+2])+e[t+3]},readInt32:function(e,t){if(t<0)throw"bigEndianByteArrayParser.readInt32: position cannot be less than 0";if(t+4>e.length)throw"bigEndianByteArrayParser.readInt32: attempt to read past end of buffer";return(e[t]<<24)+(e[t+1]<<16)+(e[t+2]<<8)+e[t+3]},readFloat:function(e,t){if(t<0)throw"bigEndianByteArrayParser.readFloat: position cannot be less than 0";if(t+4>e.length)throw"bigEndianByteArrayParser.readFloat: attempt to read past end of buffer";var r=new Uint8Array(4);return r[3]=e[t],r[2]=e[t+1],r[1]=e[t+2],r[0]=e[t+3],new Float32Array(r.buffer)[0]},readDouble:function(e,t){if(t<0)throw"bigEndianByteArrayParser.readDouble: position cannot be less than 0";if(t+8>e.length)throw"bigEndianByteArrayParser.readDouble: attempt to read past end of buffer";var r=new Uint8Array(8);return r[7]=e[t],r[6]=e[t+1],r[5]=e[t+2],r[4]=e[t+3],r[3]=e[t+4],r[2]=e[t+5],r[1]=e[t+6],r[0]=e[t+7],new Float64Array(r.buffer)[0]}};function j(e,t,r){if("undefined"!=typeof Buffer&&e instanceof Buffer)return e.slice(t,t+r);if(e instanceof Uint8Array)return new Uint8Array(e.buffer,e.byteOffset+t,r);throw"dicomParser.from: unknown type for byteArray"}function C(e,t){for(var r=0;r<t.length;r++){var a=t[r];a.enumerable=a.enumerable||!1,a.configurable=!0,"value"in a&&(a.writable=!0),Object.defineProperty(e,a.key,a)}}var J=function(){function a(e,t,r){if(!function(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}(this,a),void 0===e)throw"dicomParser.ByteStream: missing required parameter 'byteArrayParser'";if(void 0===t)throw"dicomParser.ByteStream: missing required parameter 'byteArray'";if(t instanceof Uint8Array==!1&&("undefined"==typeof Buffer||t instanceof Buffer==!1))throw"dicomParser.ByteStream: parameter byteArray is not of type Uint8Array or Buffer";if(r<0)throw"dicomParser.ByteStream: parameter 'position' cannot be less than 0";if(r>=t.length)throw"dicomParser.ByteStream: parameter 'position' cannot be greater than or equal to 'byteArray' length";this.byteArrayParser=e,this.byteArray=t,this.position=r||0,this.warnings=[]}var e,t,r;return e=a,(t=[{key:"seek",value:function(e){if(this.position+e<0)throw"dicomParser.ByteStream.prototype.seek: cannot seek to position < 0";this.position+=e}},{key:"readByteStream",value:function(e){if(this.position+e>this.byteArray.length)throw"dicomParser.ByteStream.prototype.readByteStream: readByteStream - buffer overread";var t=j(this.byteArray,this.position,e);return this.position+=e,new a(this.byteArrayParser,t)}},{key:"getSize",value:function(){return this.byteArray.length}},{key:"readUint16",value:function(){var e=this.byteArrayParser.readUint16(this.byteArray,this.position);return this.position+=2,e}},{key:"readUint32",value:function(){var e=this.byteArrayParser.readUint32(this.byteArray,this.position);return this.position+=4,e}},{key:"readFixedString",value:function(e){var t=b(this.byteArray,this.position,e);return this.position+=e,t}}])&&C(e.prototype,t),r&&C(e,r),Object.defineProperty(e,"prototype",{writable:!1}),a}(),M={readUint16:function(e,t){if(t<0)throw"littleEndianByteArrayParser.readUint16: position cannot be less than 0";if(t+2>e.length)throw"littleEndianByteArrayParser.readUint16: attempt to read past end of buffer";return e[t]+256*e[t+1]},readInt16:function(e,t){if(t<0)throw"littleEndianByteArrayParser.readInt16: position cannot be less than 0";if(t+2>e.length)throw"littleEndianByteArrayParser.readInt16: attempt to read past end of buffer";t=e[t]+(e[t+1]<<8);return t=32768&t?t-65535-1:t},readUint32:function(e,t){if(t<0)throw"littleEndianByteArrayParser.readUint32: position cannot be less than 0";if(t+4>e.length)throw"littleEndianByteArrayParser.readUint32: attempt to read past end of buffer";return e[t]+256*e[t+1]+256*e[t+2]*256+256*e[t+3]*256*256},readInt32:function(e,t){if(t<0)throw"littleEndianByteArrayParser.readInt32: position cannot be less than 0";if(t+4>e.length)throw"littleEndianByteArrayParser.readInt32: attempt to read past end of buffer";return e[t]+(e[t+1]<<8)+(e[t+2]<<16)+(e[t+3]<<24)},readFloat:function(e,t){if(t<0)throw"littleEndianByteArrayParser.readFloat: position cannot be less than 0";if(t+4>e.length)throw"littleEndianByteArrayParser.readFloat: attempt to read past end of buffer";var r=new Uint8Array(4);return r[0]=e[t],r[1]=e[t+1],r[2]=e[t+2],r[3]=e[t+3],new Float32Array(r.buffer)[0]},readDouble:function(e,t){if(t<0)throw"littleEndianByteArrayParser.readDouble: position cannot be less than 0";if(t+8>e.length)throw"littleEndianByteArrayParser.readDouble: attempt to read past end of buffer";var r=new Uint8Array(8);return r[0]=e[t],r[1]=e[t+1],r[2]=e[t+2],r[3]=e[t+3],r[4]=e[t+4],r[5]=e[t+5],r[6]=e[t+6],r[7]=e[t+7],new Float64Array(r.buffer)[0]}};function G(e){var i=1<arguments.length&&void 0!==arguments[1]?arguments[1]:{};if(void 0===e)throw"dicomParser.readPart10Header: missing required parameter 'byteArray'";var o=i.TransferSyntaxUID,s=new J(M,e);return function(){var e=function(){if(s.getSize()<=132&&o)return!1;if(s.seek(128),"DICM"===s.readFixedString(4))return!0;if(!(i||{}).TransferSyntaxUID)throw"dicomParser.readPart10Header: DICM prefix not found at location 132 - this is not a valid DICOM P10 file.";return s.seek(0),!1}(),t=[],r={};if(!e)return s.position=0,{elements:{x00020010:{tag:"x00020010",vr:"UI",Value:o}},warnings:t};for(;s.position<s.byteArray.length;){var a=s.position,n=B(s,t);if("x0002ffff"<n.tag){s.position=a;break}n.parser=M,r[n.tag]=n}return(e=new w(s.byteArrayParser,s.byteArray,r)).warnings=s.warnings,e.position=s.position,e}()}var z="1.2.840.10008.1.2.2";function V(i){var o=1<arguments.length&&void 0!==arguments[1]?arguments[1]:{};if(void 0===i)throw new Error("dicomParser.parseDicom: missing required parameter 'byteArray'");var e,a=function(e){if(void 0===e.elements.x00020010)throw new Error("dicomParser.parseDicom: missing required meta header attribute 0002,0010");e=e.elements.x00020010;return e&&e.Value||b(i,e.dataOffset,e.length)};function t(t){var e=a(t),r="1.2.840.10008.1.2"!==e,e=function(e,t){var r="[object process]"===Object.prototype.toString.call("undefined"!=typeof process?process:0);if("1.2.840.10008.1.2.1.99"!==e)return new J(e===z?N:M,i,t);if(o&&o.inflater){e=o.inflater(i,t);return new J(M,e,0)}if(!0==r){var a=s(0),n=j(i,t,i.length-t),a=a.inflateRawSync(n),n=k(i,a.length+t);return i.copy(n,0,0,t),a.copy(n,t),new J(M,n,0)}if("undefined"==typeof pako)throw"dicomParser.parseDicom: no inflater available to handle deflate transfer syntax";return a=i.slice(t),n=pako.inflateRaw(a),(a=k(i,n.length+t)).set(i.slice(0,t),0),a.set(n,t),new J(M,a,0)}(e,t.position),t=new w(e.byteArrayParser,e.byteArray,{});t.warnings=e.warnings;try{(r?q:T)(t,e,e.byteArray.length,o)}catch(e){throw{exception:e,dataSet:t}}return t}return function(e,t){for(var r in e.elements)e.elements.hasOwnProperty(r)&&(t.elements[r]=e.elements[r]);return void 0!==e.warnings&&(t.warnings=e.warnings.concat(t.warnings)),t}(e=G(i,o),t(e))}var R=function(e,t,r){for(var a=0,n=t;n<t+r;n++)a+=e[n].length;return a};function _(e,t,r,a,n){if(n=n||t.fragments,void 0===e)throw"dicomParser.readEncapsulatedPixelDataFromFragments: missing required parameter 'dataSet'";if(void 0===t)throw"dicomParser.readEncapsulatedPixelDataFromFragments: missing required parameter 'pixelDataElement'";if(void 0===r)throw"dicomParser.readEncapsulatedPixelDataFromFragments: missing required parameter 'startFragmentIndex'";if(void 0===(a=a||1))throw"dicomParser.readEncapsulatedPixelDataFromFragments: missing required parameter 'numFragments'";if("x7fe00010"!==t.tag)throw"dicomParser.readEncapsulatedPixelDataFromFragments: parameter 'pixelDataElement' refers to non pixel data tag (expected tag = x7fe00010";if(!0!==t.encapsulatedPixelData)throw"dicomParser.readEncapsulatedPixelDataFromFragments: parameter 'pixelDataElement' refers to pixel data element that does not have encapsulated pixel data";if(!0!==t.hadUndefinedLength)throw"dicomParser.readEncapsulatedPixelDataFromFragments: parameter 'pixelDataElement' refers to pixel data element that does not have encapsulated pixel data";if(void 0===t.basicOffsetTable)throw"dicomParser.readEncapsulatedPixelDataFromFragments: parameter 'pixelDataElement' refers to pixel data element that does not have encapsulated pixel data";if(void 0===t.fragments)throw"dicomParser.readEncapsulatedPixelDataFromFragments: parameter 'pixelDataElement' refers to pixel data element that does not have encapsulated pixel data";if(t.fragments.length<=0)throw"dicomParser.readEncapsulatedPixelDataFromFragments: parameter 'pixelDataElement' refers to pixel data element that does not have encapsulated pixel data";if(r<0)throw"dicomParser.readEncapsulatedPixelDataFromFragments: parameter 'startFragmentIndex' must be >= 0";if(r>=t.fragments.length)throw"dicomParser.readEncapsulatedPixelDataFromFragments: parameter 'startFragmentIndex' must be < number of fragments";if(a<1)throw"dicomParser.readEncapsulatedPixelDataFromFragments: parameter 'numFragments' must be > 0";if(r+a>t.fragments.length)throw"dicomParser.readEncapsulatedPixelDataFromFragments: parameter 'startFragment' + 'numFragments' < number of fragments";var i=new J(e.byteArrayParser,e.byteArray,t.dataOffset),t=S(i);if("xfffee000"!==t.tag)throw"dicomParser.readEncapsulatedPixelData: missing basic offset table xfffee000";i.seek(t.length);var o=i.position;if(1===a)return j(i.byteArray,o+n[r].offset+8,n[r].length);for(var t=R(n,r,a),s=k(i.byteArray,t),d=0,f=r;f<r+a;f++)for(var l=o+n[f].offset+8,u=0;u<n[f].length;u++)s[d++]=i.byteArray[l++];return s}var H=function(e,t){for(var r=0;r<e.length;r++)if(e[r].offset===t)return r},Q=function(e,t,r,a){if(e===t.length-1)return r.length-a;for(var n=t[e+1],i=a+1;i<r.length;i++)if(r[i].offset===n)return i-a;throw"dicomParser.calculateNumberOfFragmentsForFrame: could not find fragment with offset matching basic offset table"};function W(e,t,r,a,n){if(a=a||t.basicOffsetTable,n=n||t.fragments,void 0===e)throw"dicomParser.readEncapsulatedImageFrame: missing required parameter 'dataSet'";if(void 0===t)throw"dicomParser.readEncapsulatedImageFrame: missing required parameter 'pixelDataElement'";if(void 0===r)throw"dicomParser.readEncapsulatedImageFrame: missing required parameter 'frameIndex'";if(void 0===a)throw"dicomParser.readEncapsulatedImageFrame: parameter 'pixelDataElement' does not have basicOffsetTable";if("x7fe00010"!==t.tag)throw"dicomParser.readEncapsulatedImageFrame: parameter 'pixelDataElement' refers to non pixel data tag (expected tag = x7fe00010)";if(!0!==t.encapsulatedPixelData)throw"dicomParser.readEncapsulatedImageFrame: parameter 'pixelDataElement' refers to pixel data element that does not have encapsulated pixel data";if(!0!==t.hadUndefinedLength)throw"dicomParser.readEncapsulatedImageFrame: parameter 'pixelDataElement' refers to pixel data element that does not have undefined length";if(void 0===t.fragments)throw"dicomParser.readEncapsulatedImageFrame: parameter 'pixelDataElement' refers to pixel data element that does not have fragments";if(0===a.length)throw"dicomParser.readEncapsulatedImageFrame: basicOffsetTable has zero entries";if(r<0)throw"dicomParser.readEncapsulatedImageFrame: parameter 'frameIndex' must be >= 0";if(r>=a.length)throw"dicomParser.readEncapsulatedImageFrame: parameter 'frameIndex' must be < basicOffsetTable.length";var i=a[r],i=H(n,i);if(void 0===i)throw"dicomParser.readEncapsulatedImageFrame: unable to find fragment that matches basic offset table entry";return _(e,t,i,Q(r,a,n,i),n)}var $=!1;function K(e,t,r){if($||($=!0,console&&console.log&&console.log("WARNING: dicomParser.readEncapsulatedPixelData() has been deprecated")),void 0===e)throw"dicomParser.readEncapsulatedPixelData: missing required parameter 'dataSet'";if(void 0===t)throw"dicomParser.readEncapsulatedPixelData: missing required parameter 'element'";if(void 0===r)throw"dicomParser.readEncapsulatedPixelData: missing required parameter 'frame'";if("x7fe00010"!==t.tag)throw"dicomParser.readEncapsulatedPixelData: parameter 'element' refers to non pixel data tag (expected tag = x7fe00010)";if(!0!==t.encapsulatedPixelData)throw"dicomParser.readEncapsulatedPixelData: parameter 'element' refers to pixel data element that does not have encapsulated pixel data";if(!0!==t.hadUndefinedLength)throw"dicomParser.readEncapsulatedPixelData: parameter 'element' refers to pixel data element that does not have encapsulated pixel data";if(void 0===t.basicOffsetTable)throw"dicomParser.readEncapsulatedPixelData: parameter 'element' refers to pixel data element that does not have encapsulated pixel data";if(void 0===t.fragments)throw"dicomParser.readEncapsulatedPixelData: parameter 'element' refers to pixel data element that does not have encapsulated pixel data";if(r<0)throw"dicomParser.readEncapsulatedPixelData: parameter 'frame' must be >= 0";return 0!==t.basicOffsetTable.length?W(e,t,r):_(e,t,0,t.fragments.length)}t.default={isStringVr:d,isPrivateTag:f,parsePN:a,parseTM:n,parseDA:o,explicitElementToString:l,explicitDataSetToJS:u,createJPEGBasicOffsetTable:p,parseDicomDataSetExplicit:q,parseDicomDataSetImplicit:T,readFixedString:b,alloc:k,version:L,bigEndianByteArrayParser:N,ByteStream:J,sharedCopy:j,DataSet:w,findAndSetUNElementLength:y,findEndOfEncapsulatedElement:g,findItemDelimitationItemAndSetElementLength:x,littleEndianByteArrayParser:M,parseDicom:V,readDicomElementExplicit:B,readDicomElementImplicit:A,readEncapsulatedImageFrame:W,readEncapsulatedPixelData:K,readEncapsulatedPixelDataFromFragments:_,readPart10Header:G,readSequenceItemsExplicit:I,readSequenceItemsImplicit:F,readSequenceItem:S,readTag:h,LEI:"1.2.840.10008.1.2",LEE:"1.2.840.10008.1.2.1"}}],i={},n.m=a,n.c=i,n.d=function(e,t,r){n.o(e,t)||Object.defineProperty(e,t,{enumerable:!0,get:r})},n.r=function(e){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(e,"__esModule",{value:!0})},n.t=function(t,e){if(1&e&&(t=n(t)),8&e)return t;if(4&e&&"object"==typeof t&&t&&t.__esModule)return t;var r=Object.create(null);if(n.r(r),Object.defineProperty(r,"default",{enumerable:!0,value:t}),2&e&&"string"!=typeof t)for(var a in t)n.d(r,a,function(e){return t[e]}.bind(null,a));return r},n.n=function(e){var t=e&&e.__esModule?function(){return e.default}:function(){return e};return n.d(t,"a",t),t},n.o=function(e,t){return Object.prototype.hasOwnProperty.call(e,t)},n.p="",n(n.s=1);function n(e){if(i[e])return i[e].exports;var t=i[e]={i:e,l:!1,exports:{}};return a[e].call(t.exports,t,t.exports,n),t.l=!0,t.exports}var a,i});
+//# sourceMappingURL=dicomParser.min.js.map
+</script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Sora:wght@300;400;600;700&display=swap');
+
+  :root {
+    --bg: #080c14;
+    --surface: #0d1520;
+    --card: #111c2e;
+    --border: #1e3050;
+    --accent: #00d4ff;
+    --accent2: #0088cc;
+    --accent3: #00ff99;
+    --text: #e2eaf5;
+    --muted: #5a7a9a;
+    --danger: #ff4d6d;
+    --warn: #ffbe0b;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Sora', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── GRID BACKGROUND ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── PAGES ── */
+  .page { display: none; min-height: 100vh; position: relative; z-index: 1; }
+  .page.active { display: flex; }
+
+  /* ════════════════════════════════
+     PAGE 1 — LANDING
+  ════════════════════════════════ */
+  #page1 {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 2rem;
+    text-align: center;
+  }
+
+  .logo-ring {
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 2.5rem;
+    position: relative;
+    animation: spin 8s linear infinite;
+  }
+  .logo-ring::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    border-top-color: var(--accent);
+    border-right-color: var(--accent3);
+    animation: spin 3s linear infinite;
+  }
+  .logo-ring svg { width: 52px; height: 52px; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .badge {
+    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 3px 12px;
+    border-radius: 20px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    opacity: 0.8;
+  }
+
+  h1 {
+    font-size: clamp(2.2rem, 5vw, 3.8rem);
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(135deg, #ffffff 30%, var(--accent) 80%, var(--accent3) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .landing-desc {
+    font-size: 1.05rem;
+    color: var(--muted);
+    max-width: 560px;
+    line-height: 1.8;
+    margin: 0 auto 3rem;
+    font-weight: 300;
+  }
+  .landing-desc strong { color: var(--accent); font-weight: 600; }
+
+  .features {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 680px;
+    margin: 0 auto 3rem;
+  }
+  .feature-chip {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.55rem 1rem;
+    font-size: 0.78rem;
+    color: var(--muted);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .feature-chip span.dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent3);
+    flex-shrink: 0;
+  }
+
+  .btn-next {
+    display: inline-flex;
+    align-items: center; gap: 10px;
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    color: var(--bg);
+    font-family: 'Sora', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    padding: 0.85rem 2.5rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    transition: all 0.2s ease;
+    box-shadow: 0 0 30px rgba(0,212,255,0.25);
+  }
+  .btn-next:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 50px rgba(0,212,255,0.45);
+  }
+  .btn-next svg { width: 18px; height: 18px; }
+
+  .author-sig {
+    position: fixed;
+    bottom: 1.5rem; left: 0; right: 0;
+    text-align: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+    opacity: 0.6;
+    z-index: 10;
+  }
+  .author-sig span { color: var(--accent); }
+
+  /* ════════════════════════════════
+     PAGE 2 — APP
+  ════════════════════════════════ */
+  #page2 {
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* TOP BAR */
+  .topbar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0 1.5rem;
+    height: 52px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    z-index: 20;
+  }
+  .topbar-logo {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    font-weight: 500;
+  }
+  .topbar-sep { width: 1px; height: 20px; background: var(--border); }
+  .topbar-title {
+    font-size: 0.78rem;
+    color: var(--muted);
+    font-weight: 300;
+    font-family: 'DM Mono', monospace;
+  }
+  .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+
+  .upload-btn-small {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 5px 14px;
+    border-radius: 6px;
+    font-family: 'Sora', sans-serif;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .upload-btn-small:hover { border-color: var(--accent); color: var(--accent); }
+  .upload-btn-small svg { width: 13px; height: 13px; }
+
+  /* MAIN LAYOUT */
+  .app-body {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* LEFT PANEL */
+  .left-panel {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .panel-section {
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .panel-header {
+    display: flex; align-items: center; gap: 8px;
+    padding: 0.7rem 1rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    user-select: none;
+  }
+  .panel-header .chevron { margin-left: auto; transition: transform 0.2s; }
+  .panel-header.collapsed .chevron { transform: rotate(-90deg); }
+  .panel-header .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+
+  /* WINDOWING CONTROLS */
+  .windowing-body { padding: 1rem; }
+
+  .slider-group { margin-bottom: 1rem; }
+  .slider-label {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 6px;
+    font-size: 0.72rem;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+  }
+  .slider-value {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--accent);
+    padding: 1px 8px;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    min-width: 54px;
+    text-align: center;
+  }
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 4px;
+    background: var(--border);
+    border-radius: 4px;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    box-shadow: 0 0 8px rgba(0,212,255,0.5);
+  }
+  input[type=range].ww::-webkit-slider-thumb { background: var(--accent3); box-shadow: 0 0 8px rgba(0,255,153,0.4); }
+
+  .presets {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5px;
+    margin-top: 0.5rem;
+  }
+  .preset-btn {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 5px 0;
+    border-radius: 5px;
+    font-size: 0.68rem;
+    font-family: 'DM Mono', monospace;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+  }
+  .preset-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .preset-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(0,212,255,0.08); }
+
+  /* METADATA PANEL */
+  .meta-body { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+
+  .meta-filter-bar {
+    padding: 0.6rem 1rem;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    flex-shrink: 0;
+  }
+  .meta-filter-bar input {
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 6px 10px 6px 32px;
+    border-radius: 6px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .meta-filter-bar input:focus { border-color: var(--accent); }
+  .meta-filter-bar input::placeholder { color: var(--muted); }
+  .meta-filter-icon {
+    position: absolute;
+    left: 22px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    width: 13px; height: 13px;
+  }
+
+  .meta-count {
+    padding: 4px 1rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .meta-count span { color: var(--accent); }
+
+  .meta-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.4rem 0;
+  }
+  .meta-list::-webkit-scrollbar { width: 4px; }
+  .meta-list::-webkit-scrollbar-track { background: transparent; }
+  .meta-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .meta-item {
+    padding: 5px 1rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    border-bottom: 1px solid rgba(30,48,80,0.4);
+    transition: background 0.1s;
+  }
+  .meta-item:hover { background: rgba(0,212,255,0.04); }
+  .meta-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    color: var(--accent2);
+    min-width: 80px;
+    flex-shrink: 0;
+    padding-top: 1px;
+    letter-spacing: 0.05em;
+  }
+  .meta-info { flex: 1; min-width: 0; }
+  .meta-name {
+    font-size: 0.68rem;
+    color: var(--text);
+    font-weight: 600;
+    margin-bottom: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .meta-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.63rem;
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 180px;
+  }
+  .meta-vr {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.58rem;
+    background: rgba(0,136,204,0.15);
+    color: var(--accent2);
+    border: 1px solid rgba(0,136,204,0.25);
+    padding: 1px 5px;
+    border-radius: 3px;
+    flex-shrink: 0;
+    align-self: center;
+  }
+
+  /* RIGHT — VIEWER */
+  .viewer-panel {
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .viewer-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0.5rem 1rem;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .tool-btn {
+    display: flex; align-items: center; gap: 5px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .tool-btn:hover, .tool-btn.active { border-color: var(--accent); color: var(--accent); }
+  .tool-btn svg { width: 13px; height: 13px; }
+
+  .viewer-info {
+    margin-left: auto;
+    display: flex; align-items: center; gap: 10px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+  }
+  .info-chip {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
+  .info-chip span { color: var(--accent); }
+
+  .canvas-area {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #dicomCanvas {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    image-rendering: pixelated;
+    display: none;
+  }
+
+  .drop-zone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    color: var(--muted);
+    text-align: center;
+    padding: 3rem;
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    margin: 2rem;
+    width: calc(100% - 4rem);
+    height: calc(100% - 4rem);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .drop-zone:hover, .drop-zone.dragover {
+    border-color: var(--accent);
+    background: rgba(0,212,255,0.04);
+  }
+  .drop-zone svg { width: 52px; height: 52px; color: var(--border); }
+  .drop-zone h3 { font-size: 0.95rem; font-weight: 600; color: var(--text); }
+  .drop-zone p { font-size: 0.78rem; font-weight: 300; line-height: 1.6; }
+  .drop-zone .upload-cta {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 7px 16px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    transition: all 0.15s;
+  }
+  .drop-zone .upload-cta:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* EMPTY STATE */
+  .empty-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    color: var(--muted);
+    font-size: 0.75rem;
+    font-family: 'DM Mono', monospace;
+    gap: 8px;
+    padding: 2rem;
+    text-align: center;
+  }
+  .empty-meta svg { width: 32px; height: 32px; opacity: 0.3; }
+
+  /* PROGRESS */
+  .progress-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(8,12,20,0.85);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    z-index: 50;
+    display: none;
+  }
+  .progress-bar {
+    width: 200px; height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+    border-radius: 2px;
+    width: 0%;
+    transition: width 0.1s;
+    animation: shimmer 1s ease-in-out infinite;
+  }
+  @keyframes shimmer {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+
+  .status-msg {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--accent);
+  }
+
+  /* FILE INPUT HIDDEN */
+  #fileInput { display: none; }
+
+  /* PIXEL INFO */
+  .pixel-info {
+    position: absolute;
+    bottom: 1rem; right: 1rem;
+    background: rgba(13,21,32,0.9);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    pointer-events: none;
+    display: none;
+  }
+  .pixel-info span { color: var(--accent); }
+
+  /* CATEGORY TABS */
+  .cat-tabs {
+    display: flex;
+    padding: 0.4rem 1rem 0;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .cat-tab {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.63rem;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .cat-tab:hover { color: var(--text); }
+  .cat-tab.active { background: var(--card); border-color: var(--border); color: var(--accent); }
+
+  /* TOOLTIP */
+  .tooltip {
+    position: absolute;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text);
+    pointer-events: none;
+    z-index: 100;
+    white-space: nowrap;
+    display: none;
+  }
+
+  /* NOTIFICATION */
+  .notif {
+    position: fixed;
+    top: 1rem; right: 1rem;
+    background: var(--card);
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--accent);
+    z-index: 200;
+    transform: translateX(200%);
+    transition: transform 0.3s ease;
+    box-shadow: 0 0 20px rgba(0,212,255,0.2);
+  }
+  .notif.show { transform: translateX(0); }
+  .notif.error { border-color: var(--danger); color: var(--danger); box-shadow: 0 0 20px rgba(255,77,109,0.2); }
+
+  /* SCROLLBAR GLOBAL */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- ────────────────────────────────────────
+     PAGE 1 — LANDING
+─────────────────────────────────────────── -->
+<div id="page1" class="page active">
+
+  <div class="logo-ring">
+    <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="26" cy="26" r="22" stroke="#1e3050" stroke-width="1.5"/>
+      <circle cx="26" cy="26" r="12" stroke="#00d4ff" stroke-width="1.5" stroke-dasharray="3 3"/>
+      <circle cx="26" cy="26" r="4" fill="#00d4ff" opacity="0.8"/>
+      <line x1="26" y1="4" x2="26" y2="14" stroke="#00d4ff" stroke-width="1.5"/>
+      <line x1="26" y1="38" x2="26" y2="48" stroke="#00d4ff" stroke-width="1.5"/>
+      <line x1="4" y1="26" x2="14" y2="26" stroke="#00ff99" stroke-width="1.5"/>
+      <line x1="38" y1="26" x2="48" y2="26" stroke="#00ff99" stroke-width="1.5"/>
+    </svg>
+  </div>
+
+  <div class="badge">Medical Imaging Tool</div>
+
+  <h1>DICOM<br>Viewer</h1>
+
+  <p class="landing-desc">
+    Explorez vos images médicales avec précision. Chargez un fichier <strong>.dcm</strong>,
+    visualisez l'ensemble des métadonnées et ajustez dynamiquement le
+    <strong>fenêtrage</strong> pour une lecture diagnostique optimale.
+  </p>
+
+  <div class="features">
+    <div class="feature-chip"><span class="dot"></span> Lecture fichiers DICOM</div>
+    <div class="feature-chip"><span class="dot"></span> Fenêtrage WC / WW interactif</div>
+    <div class="feature-chip"><span class="dot"></span> Métadonnées filtrables</div>
+    <div class="feature-chip"><span class="dot"></span> Préréglages cliniques</div>
+    <div class="feature-chip"><span class="dot"></span> 100% local — aucun serveur</div>
+    <div class="feature-chip"><span class="dot"></span> Export des informations</div>
+  </div>
+
+  <button class="btn-next" onclick="goToPage2()">
+    Lancer l'application
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+      <line x1="5" y1="12" x2="19" y2="12"/><polyline points="13,6 19,12 13,18"/>
+    </svg>
+  </button>
+
+</div>
+
+<div class="author-sig">by <span>Fatima Zahra Karrakchou</span></div>
+
+<!-- ────────────────────────────────────────
+     PAGE 2 — APP
+─────────────────────────────────────────── -->
+<div id="page2" class="page">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <span class="topbar-logo">DICOM·VIEW</span>
+    <div class="topbar-sep"></div>
+    <span class="topbar-title" id="topbarFilename">aucun fichier chargé</span>
+    <div class="topbar-right">
+      <button class="upload-btn-small" onclick="document.getElementById('fileInput').click()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17,8 12,3 7,8"/><line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+        Ouvrir fichier
+      </button>
+      <button class="upload-btn-small" onclick="exportMeta()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Exporter
+      </button>
+      <span class="topbar-sep"></span>
+      <span style="font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--muted)">by Fatima Zahra Karrakchou</span>
+    </div>
+  </div>
+
+  <input type="file" id="fileInput" accept=".dcm,.dicom,application/dicom" onchange="handleFile(event)">
+
+  <!-- APP BODY -->
+  <div class="app-body">
+
+    <!-- LEFT PANEL -->
+    <div class="left-panel">
+
+      <!-- WINDOWING -->
+      <div class="panel-section">
+        <div class="panel-header" id="windowHeader" onclick="toggleSection('windowBody','windowHeader')">
+          <span class="dot"></span>
+          Fenêtrage (WC / WW)
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12">
+            <polyline points="6,9 12,15 18,9"/>
+          </svg>
+        </div>
+        <div class="windowing-body" id="windowBody">
+          <div class="slider-group">
+            <div class="slider-label">
+              <span>Window Center (WC)</span>
+              <div class="slider-value" id="wcVal">400</div>
+            </div>
+            <input type="range" id="wcSlider" min="-1000" max="3000" value="400" oninput="updateWindowing()">
+          </div>
+          <div class="slider-group">
+            <div class="slider-label">
+              <span>Window Width (WW)</span>
+              <div class="slider-value" id="wwVal" style="color:var(--accent3)">1500</div>
+            </div>
+            <input type="range" class="ww" id="wwSlider" min="1" max="4000" value="1500" oninput="updateWindowing()">
+          </div>
+
+        </div>
+      </div>
+
+      <!-- METADATA -->
+      <div class="panel-section" style="flex:1;display:flex;flex-direction:column;overflow:hidden;border-bottom:none;">
+        <div class="panel-header">
+          <span class="dot" style="background:var(--accent3)"></span>
+          Métadonnées DICOM
+        </div>
+        <div class="meta-body">
+          <div class="cat-tabs">
+            <button class="cat-tab active" onclick="filterByCategory('all',this)">Tous</button>
+            <button class="cat-tab" onclick="filterByCategory('patient',this)">Patient</button>
+            <button class="cat-tab" onclick="filterByCategory('study',this)">Étude</button>
+            <button class="cat-tab" onclick="filterByCategory('image',this)">Image</button>
+            <button class="cat-tab" onclick="filterByCategory('equipment',this)">Équip.</button>
+          </div>
+          <div class="meta-filter-bar">
+            <svg class="meta-filter-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input type="text" id="metaSearch" placeholder="Filtrer les métadonnées..." oninput="filterMeta()">
+          </div>
+          <div class="meta-count" id="metaCount"><span>0</span> attribut(s)</div>
+          <div class="meta-list" id="metaList">
+            <div class="empty-meta">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="9" x2="15" y2="9"/>
+                <line x1="9" y1="13" x2="12" y2="13"/>
+              </svg>
+              <span>Charger un fichier DICOM<br>pour afficher les métadonnées</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT — VIEWER -->
+    <div class="viewer-panel">
+
+      <div class="viewer-toolbar">
+        <button class="tool-btn active" id="toolNone" onclick="setTool('none')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="13">
+            <path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/>
+          </svg> Sélection
+        </button>
+        <button class="tool-btn" id="toolZoom" onclick="setTool('zoom')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="13">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            <line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/>
+          </svg> Zoom
+        </button>
+        <button class="tool-btn" onclick="resetView()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="13">
+            <polyline points="1,4 1,10 7,10"/><path d="M3.51 15a9 9 0 1 0 .49-3.51"/>
+          </svg> Reset
+        </button>
+        <button class="tool-btn" onclick="invertImage()" id="btnInvert">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13">
+            <circle cx="12" cy="12" r="9"/>
+            <path d="M12 3a9 9 0 0 1 0 18" fill="currentColor"/>
+          </svg> Inverser
+        </button>
+        <div class="viewer-info">
+          <div class="info-chip">WC: <span id="infoWC">—</span></div>
+          <div class="info-chip">WW: <span id="infoWW">—</span></div>
+          <div class="info-chip" id="infoSize">—×—</div>
+        </div>
+      </div>
+
+      <div class="canvas-area" id="canvasArea">
+        <div class="drop-zone" id="dropZone"
+          ondragover="event.preventDefault();this.classList.add('dragover')"
+          ondragleave="this.classList.remove('dragover')"
+          ondrop="handleDrop(event)"
+          onclick="document.getElementById('fileInput').click()">
+          <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+            <rect x="8" y="8" width="48" height="48" rx="6"/>
+            <circle cx="32" cy="28" r="8"/>
+            <line x1="32" y1="20" x2="32" y2="36"/>
+            <line x1="24" y1="28" x2="40" y2="28"/>
+            <line x1="16" y1="44" x2="48" y2="44"/>
+          </svg>
+          <h3>Déposer un fichier DICOM</h3>
+          <p>Glissez-déposez votre fichier .dcm ici<br>ou cliquez pour parcourir</p>
+          <div class="upload-cta">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17,8 12,3 7,8"/><line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            Parcourir les fichiers
+          </div>
+        </div>
+        <canvas id="dicomCanvas" style="display:none;max-width:100%;max-height:100%;"></canvas>
+        <div class="progress-overlay" id="progressOverlay">
+          <div class="status-msg" id="progressMsg">Chargement...</div>
+          <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+        </div>
+        <div class="pixel-info" id="pixelInfo">X: <span id="pX">0</span>  Y: <span id="pY">0</span>  HU: <span id="pHU">—</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- NOTIFICATION -->
+<div class="notif" id="notif"></div>
+
+<script>
+/* ═══════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════ */
+function goToPage2() {
+  document.getElementById('page1').classList.remove('active');
+  document.getElementById('page2').classList.add('active');
+}
+
+/* ═══════════════════════════════════════
+   STATE
+═══════════════════════════════════════ */
+let dicomData = null;
+let rawPixels = null;
+let imageWidth = 0, imageHeight = 0;
+let rescaleSlope = 1, rescaleIntercept = 0;
+let zoomLevel = 1;
+let isInverted = false;
+let currentTool = 'none';
+let allMeta = [];
+let activeCategory = 'all';
+
+/* ═══════════════════════════════════════
+   FILE HANDLING
+═══════════════════════════════════════ */
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('dropZone').classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) loadDicom(file);
+}
+
+function handleFile(e) {
+  const file = e.target.files[0];
+  if (file) loadDicom(file);
+  e.target.value = '';
+}
+
+function loadDicom(file) {
+  showProgress('Lecture du fichier...');
+  document.getElementById('topbarFilename').textContent = file.name;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    setProgress(40);
+    try {
+      const buf = e.target.result;
+      const byteArray = new Uint8Array(buf);
+
+      let ds;
+      try {
+        ds = dicomParser.parseDicom(byteArray);
+      } catch(err) {
+        // try with a forgiving parse
+        ds = dicomParser.parseDicom(byteArray, { TransferSyntaxUID: '1.2.840.10008.1.2.1' });
+      }
+
+      dicomData = ds;
+      setProgress(70);
+      extractMetadata(ds);
+      setProgress(85);
+      renderImage(ds);
+      setProgress(100);
+      setTimeout(hideProgress, 300);
+      notify('Fichier chargé avec succès');
+    } catch(err) {
+      hideProgress();
+      notify('Erreur: fichier DICOM invalide ou non supporté', true);
+      console.error(err);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+/* ═══════════════════════════════════════
+   IMAGE RENDERING
+═══════════════════════════════════════ */
+function renderImage(ds) {
+  try {
+    const rows = ds.uint16('x00280010');
+    const cols = ds.uint16('x00280011');
+    imageWidth = cols; imageHeight = rows;
+
+    const bitsAlloc = ds.uint16('x00280100') || 16;
+    const pixRep = ds.uint16('x00280103') || 0;
+    const samplesPerPixel = ds.uint16('x00280002') || 1;
+
+    rescaleSlope = parseFloat(ds.string('x00281053') || '1');
+    rescaleIntercept = parseFloat(ds.string('x00281052') || '0');
+    if (isNaN(rescaleSlope)) rescaleSlope = 1;
+    if (isNaN(rescaleIntercept)) rescaleIntercept = 0;
+
+    const pixelDataEl = ds.elements.x7fe00010;
+    if (!pixelDataEl) throw new Error('Pas de données pixel');
+
+    const pixelBytes = new Uint8Array(ds.byteArray.buffer, pixelDataEl.dataOffset, pixelDataEl.length);
+
+    if (bitsAlloc === 16) {
+      if (pixRep === 1) {
+        rawPixels = new Int16Array(pixelBytes.buffer, pixelBytes.byteOffset, pixelBytes.length / 2);
+      } else {
+        rawPixels = new Uint16Array(pixelBytes.buffer, pixelBytes.byteOffset, pixelBytes.length / 2);
+      }
+    } else {
+      rawPixels = new Uint8Array(pixelBytes);
+    }
+
+    // Detect WC/WW
+    let wc = parseFloat(ds.string('x00281050') || '400');
+    let ww = parseFloat(ds.string('x00281051') || '1500');
+    if (isNaN(wc)) wc = 400;
+    if (isNaN(ww)) ww = 1500;
+
+    document.getElementById('wcSlider').value = wc;
+    document.getElementById('wwSlider').value = ww;
+    document.getElementById('wcVal').textContent = Math.round(wc);
+    document.getElementById('wwVal').textContent = Math.round(ww);
+    document.getElementById('infoWC').textContent = Math.round(wc);
+    document.getElementById('infoWW').textContent = Math.round(ww);
+    document.getElementById('infoSize').textContent = `${cols}×${rows}`;
+
+    drawCanvas(wc, ww);
+
+    document.getElementById('dropZone').style.display = 'none';
+    document.getElementById('dicomCanvas').style.display = 'block';
+    document.getElementById('pixelInfo').style.display = 'block';
+    setupCanvasEvents();
+
+  } catch(err) {
+    console.error('Image render error:', err);
+    notify('Aperçu non disponible: ' + err.message, true);
+    document.getElementById('infoSize').textContent = 'N/A';
+  }
+}
+
+function drawCanvas(wc, ww) {
+  if (!rawPixels || !imageWidth || !imageHeight) return;
+
+  const canvas = document.getElementById('dicomCanvas');
+  canvas.width = imageWidth;
+  canvas.height = imageHeight;
+  const ctx = canvas.getContext('2d');
+  const imgData = ctx.createImageData(imageWidth, imageHeight);
+
+  const vmin = wc - ww / 2;
+  const vmax = wc + ww / 2;
+
+  for (let i = 0; i < rawPixels.length; i++) {
+    let hu = rawPixels[i] * rescaleSlope + rescaleIntercept;
+    let val = Math.round(((hu - vmin) / (vmax - vmin)) * 255);
+    val = Math.max(0, Math.min(255, val));
+    if (isInverted) val = 255 - val;
+    imgData.data[i * 4] = val;
+    imgData.data[i * 4 + 1] = val;
+    imgData.data[i * 4 + 2] = val;
+    imgData.data[i * 4 + 3] = 255;
+  }
+  ctx.putImageData(imgData, 0, 0);
+}
+
+/* ═══════════════════════════════════════
+   WINDOWING
+═══════════════════════════════════════ */
+function updateWindowing() {
+  const wc = parseInt(document.getElementById('wcSlider').value);
+  const ww = parseInt(document.getElementById('wwSlider').value);
+  document.getElementById('wcVal').textContent = wc;
+  document.getElementById('wwVal').textContent = ww;
+  document.getElementById('infoWC').textContent = wc;
+  document.getElementById('infoWW').textContent = ww;
+  drawCanvas(wc, ww);
+  // clear preset active
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+}
+
+function applyPreset(wc, ww, label) {
+  document.getElementById('wcSlider').value = wc;
+  document.getElementById('wwSlider').value = ww;
+  document.getElementById('wcVal').textContent = wc;
+  document.getElementById('wwVal').textContent = ww;
+  document.getElementById('infoWC').textContent = wc;
+  document.getElementById('infoWW').textContent = ww;
+  drawCanvas(wc, ww);
+  document.querySelectorAll('.preset-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent === label);
+  });
+  notify(`Préréglage: ${label}`);
+}
+
+/* ═══════════════════════════════════════
+   TOOLS
+═══════════════════════════════════════ */
+function setTool(tool) {
+  currentTool = tool;
+  document.querySelectorAll('.tool-btn[id^="tool"]').forEach(b => b.classList.remove('active'));
+  if (document.getElementById('tool' + tool.charAt(0).toUpperCase() + tool.slice(1))) {
+    document.getElementById('tool' + tool.charAt(0).toUpperCase() + tool.slice(1)).classList.add('active');
+  }
+}
+
+function invertImage() {
+  isInverted = !isInverted;
+  document.getElementById('btnInvert').classList.toggle('active', isInverted);
+  const wc = parseInt(document.getElementById('wcSlider').value);
+  const ww = parseInt(document.getElementById('wwSlider').value);
+  drawCanvas(wc, ww);
+  notify(isInverted ? 'Image inversée' : 'Image normale');
+}
+
+function resetView() {
+  zoomLevel = 1;
+  isInverted = false;
+  document.getElementById('btnInvert').classList.remove('active');
+  const canvas = document.getElementById('dicomCanvas');
+  canvas.style.transform = 'scale(1)';
+  if (dicomData) {
+    let wc = parseFloat(dicomData.string('x00281050') || '400');
+    let ww = parseFloat(dicomData.string('x00281051') || '1500');
+    if (isNaN(wc)) wc = 400; if (isNaN(ww)) ww = 1500;
+    document.getElementById('wcSlider').value = wc;
+    document.getElementById('wwSlider').value = ww;
+    document.getElementById('wcVal').textContent = Math.round(wc);
+    document.getElementById('wwVal').textContent = Math.round(ww);
+    document.getElementById('infoWC').textContent = Math.round(wc);
+    document.getElementById('infoWW').textContent = Math.round(ww);
+    drawCanvas(wc, ww);
+  }
+  notify('Vue réinitialisée');
+}
+
+function setupCanvasEvents() {
+  const canvas = document.getElementById('dicomCanvas');
+
+  canvas.onmousemove = function(e) {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = imageWidth / rect.width;
+    const scaleY = imageHeight / rect.height;
+    const x = Math.floor((e.clientX - rect.left) * scaleX);
+    const y = Math.floor((e.clientY - rect.top) * scaleY);
+    if (x >= 0 && x < imageWidth && y >= 0 && y < imageHeight) {
+      const idx = y * imageWidth + x;
+      const raw = rawPixels ? rawPixels[idx] : 0;
+      const hu = raw * rescaleSlope + rescaleIntercept;
+      document.getElementById('pX').textContent = x;
+      document.getElementById('pY').textContent = y;
+      document.getElementById('pHU').textContent = Math.round(hu);
+    }
+  };
+
+  // Zoom on wheel
+  canvas.onwheel = function(e) {
+    e.preventDefault();
+    zoomLevel = Math.max(0.5, Math.min(8, zoomLevel + (e.deltaY < 0 ? 0.1 : -0.1)));
+    canvas.style.transform = `scale(${zoomLevel})`;
+  };
+}
+
+/* ═══════════════════════════════════════
+   METADATA
+═══════════════════════════════════════ */
+// Category mapping by tag group
+const categoryMap = {
+  'patient': ['0010'],
+  'study': ['0008','0020','0032'],
+  'image': ['0028','7fe0','0002'],
+  'equipment': ['0008','0018','0050']
+};
+
+// Expanded category logic
+function getCategory(group) {
+  if (group === '0010') return 'patient';
+  if (['0008','0020','0032'].includes(group)) return 'study';
+  if (['0028','7fe0','0002'].includes(group)) return 'image';
+  if (group === '0018' || group === '0050') return 'equipment';
+  return 'other';
+}
+
+function extractMetadata(ds) {
+  allMeta = [];
+  const elements = ds.elements;
+
+  for (const tag in elements) {
+    try {
+      const el = elements[tag];
+      if (!el || el.length > 200) continue;
+
+      const group = tag.substring(1, 5);
+      const elem  = tag.substring(5, 9);
+      const tagStr = `(${group},${elem})`;
+
+      let name = 'Unknown';
+      let val = '';
+      let vr = el.vr || '??';
+
+      try { name = dicomParser.explicitDataSetToJS ? '' : ''; } catch(e) {}
+
+      // Try to get value
+      try {
+        if (el.vr === 'SQ' || el.length > 128) { val = '[séquence]'; }
+        else if (['US','SS'].includes(el.vr)) { val = String(ds.uint16(tag) || ''); }
+        else if (el.vr === 'UL') { val = String(ds.uint32(tag) || ''); }
+        else if (['DS','IS','LO','SH','LT','ST','UT','CS','PN','DA','TM','UI','AS'].includes(el.vr)) {
+          val = ds.string(tag) || '';
+        } else {
+          val = ds.string(tag) || `[${el.length} octets]`;
+        }
+      } catch(e) { val = '[lecture impossible]'; }
+
+      // Human name from known tags
+      name = DICOM_NAMES[tag.toUpperCase()] || name || tag;
+
+      allMeta.push({ tag: tagStr, name, val: String(val).trim(), vr, group, category: getCategory(group) });
+    } catch(e) {}
+  }
+
+  renderMetaList(allMeta);
+}
+
+function renderMetaList(items) {
+  const list = document.getElementById('metaList');
+  document.getElementById('metaCount').innerHTML = `<span>${items.length}</span> attribut(s)`;
+
+  if (items.length === 0) {
+    list.innerHTML = `<div class="empty-meta">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="12"/><dot cx="12" cy="16" r="1"/></svg>
+      <span>Aucun résultat</span></div>`;
+    return;
+  }
+
+  list.innerHTML = items.map(m => `
+    <div class="meta-item" title="${m.name}: ${m.val}">
+      <span class="meta-tag">${m.tag}</span>
+      <div class="meta-info">
+        <div class="meta-name">${m.name}</div>
+        <div class="meta-val">${m.val || '—'}</div>
+      </div>
+      <span class="meta-vr">${m.vr}</span>
+    </div>`).join('');
+}
+
+function filterMeta() {
+  const q = document.getElementById('metaSearch').value.toLowerCase();
+  let filtered = allMeta.filter(m => {
+    const matchCat = activeCategory === 'all' || m.category === activeCategory;
+    const matchQ = !q || m.name.toLowerCase().includes(q) || m.tag.includes(q) || m.val.toLowerCase().includes(q);
+    return matchCat && matchQ;
+  });
+  renderMetaList(filtered);
+}
+
+function filterByCategory(cat, el) {
+  activeCategory = cat;
+  document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  filterMeta();
+}
+
+/* ═══════════════════════════════════════
+   EXPORT
+═══════════════════════════════════════ */
+function exportMeta() {
+  if (!allMeta.length) { notify('Aucune métadonnée à exporter', true); return; }
+  let txt = 'DICOM METADATA EXPORT\n' + '='.repeat(50) + '\n\n';
+  allMeta.forEach(m => {
+    txt += `${m.tag}  [${m.vr}]  ${m.name}\n  → ${m.val || '—'}\n\n`;
+  });
+  const blob = new Blob([txt], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'dicom_metadata.txt';
+  a.click();
+  notify('Export réussi');
+}
+
+/* ═══════════════════════════════════════
+   UI HELPERS
+═══════════════════════════════════════ */
+function toggleSection(bodyId, headerId) {
+  const body = document.getElementById(bodyId);
+  const header = document.getElementById(headerId);
+  const hidden = body.style.display === 'none';
+  body.style.display = hidden ? 'block' : 'none';
+  header.classList.toggle('collapsed', !hidden);
+}
+
+function showProgress(msg) {
+  document.getElementById('progressMsg').textContent = msg;
+  document.getElementById('progressOverlay').style.display = 'flex';
+  setProgress(20);
+}
+function setProgress(v) {
+  document.getElementById('progressFill').style.width = v + '%';
+}
+function hideProgress() {
+  document.getElementById('progressOverlay').style.display = 'none';
+}
+
+let notifTimer;
+function notify(msg, isError = false) {
+  const el = document.getElementById('notif');
+  el.textContent = msg;
+  el.className = 'notif' + (isError ? ' error' : '') + ' show';
+  clearTimeout(notifTimer);
+  notifTimer = setTimeout(() => { el.classList.remove('show'); }, 2800);
+}
+
+/* ═══════════════════════════════════════
+   DICOM TAG DICTIONARY (abridged)
+═══════════════════════════════════════ */
+const DICOM_NAMES = {
+  'X00080005': 'Specific Character Set',
+  'X00080008': 'Image Type',
+  'X00080016': 'SOP Class UID',
+  'X00080018': 'SOP Instance UID',
+  'X00080020': 'Study Date',
+  'X00080021': 'Series Date',
+  'X00080022': 'Acquisition Date',
+  'X00080023': 'Content Date',
+  'X00080030': 'Study Time',
+  'X00080031': 'Series Time',
+  'X00080032': 'Acquisition Time',
+  'X00080033': 'Content Time',
+  'X00080050': 'Accession Number',
+  'X00080060': 'Modality',
+  'X00080070': 'Manufacturer',
+  'X00080080': 'Institution Name',
+  'X00080090': 'Referring Physician',
+  'X00081030': 'Study Description',
+  'X0008103E': 'Series Description',
+  'X00081040': 'Institutional Department',
+  'X00081070': 'Operators Name',
+  'X00081090': 'Manufacturer Model Name',
+  'X00100010': 'Patient Name',
+  'X00100020': 'Patient ID',
+  'X00100030': 'Patient Birth Date',
+  'X00100040': 'Patient Sex',
+  'X00101010': 'Patient Age',
+  'X00101020': 'Patient Size',
+  'X00101030': 'Patient Weight',
+  'X00180010': 'Contrast Agent',
+  'X00180015': 'Body Part Examined',
+  'X00180050': 'Slice Thickness',
+  'X00180060': 'kVp',
+  'X00180081': 'Echo Time',
+  'X00180082': 'Inversion Time',
+  'X00180083': 'Number of Averages',
+  'X00180084': 'Imaging Frequency',
+  'X00180085': 'Imaged Nucleus',
+  'X00180087': 'Magnetic Field Strength',
+  'X00180088': 'Spacing Between Slices',
+  'X00180089': 'Number of Phase Encoding Steps',
+  'X00181000': 'Device Serial Number',
+  'X00181030': 'Protocol Name',
+  'X00181050': 'Spatial Resolution',
+  'X00181251': 'Transmit Coil Name',
+  'X00181314': 'Flip Angle',
+  'X00185100': 'Patient Position',
+  'X0020000D': 'Study Instance UID',
+  'X0020000E': 'Series Instance UID',
+  'X00200010': 'Study ID',
+  'X00200011': 'Series Number',
+  'X00200013': 'Instance Number',
+  'X00200032': 'Image Position Patient',
+  'X00200037': 'Image Orientation Patient',
+  'X00201040': 'Position Reference Indicator',
+  'X00201041': 'Slice Location',
+  'X00280002': 'Samples per Pixel',
+  'X00280004': 'Photometric Interpretation',
+  'X00280010': 'Rows',
+  'X00280011': 'Columns',
+  'X00280030': 'Pixel Spacing',
+  'X00280100': 'Bits Allocated',
+  'X00280101': 'Bits Stored',
+  'X00280102': 'High Bit',
+  'X00280103': 'Pixel Representation',
+  'X00281050': 'Window Center',
+  'X00281051': 'Window Width',
+  'X00281052': 'Rescale Intercept',
+  'X00281053': 'Rescale Slope',
+  'X00281054': 'Rescale Type',
+  'X7FE00010': 'Pixel Data',
+};
+</script>
+</body>
+</html>
